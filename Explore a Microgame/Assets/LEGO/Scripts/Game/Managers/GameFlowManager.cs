@@ -10,6 +10,7 @@ namespace Unity.LEGO.Game
 
     public class GameFlowManager : MonoBehaviour
     {
+        public LevelManager levelManager;
         [Header("Win")]
         [SerializeField, Tooltip("The name of the scene you want to load when the game is won.")]
         string m_WinScene = "Menu Win";
@@ -58,9 +59,35 @@ namespace Unity.LEGO.Game
                 m_FreeLookCamera.m_YAxis.m_InputAxisName = "";
             }
         }
+        bool LoadingLevelManger = false;
+        void SetUpLevelManegr()
+        {
+            SceneManager.sceneLoaded += LoadedLevelManager;
+            LoadingLevelManger = true;
+            SceneManager.LoadScene("Level Manager", LoadSceneMode.Additive);
+        }
+
+        private void LoadedLevelManager(Scene arg0, LoadSceneMode arg1)
+        {
+            if (arg0.name == "Level Manager")
+            {
+                levelManager = FindObjectOfType<LevelManager>();
+                SceneManager.sceneLoaded -= LoadedLevelManager;
+                LoadingLevelManger = false;
+            }
+        }
+
+        private void GetLevelManager()
+        {
+            levelManager = FindObjectOfType<LevelManager>();
+            if (levelManager == null)
+                SetUpLevelManegr();
+
+        }
 
         void Start()
         {
+            GetLevelManager();
             StartCoroutine(StartGameLockLookRotation());
 
             VariableManager.Reset();
@@ -85,6 +112,9 @@ namespace Unity.LEGO.Game
 
         void Update()
         {
+            if (levelManager == null && LoadingLevelManger == false)
+                GetLevelManager();
+
             if (GameIsEnding)
             {
                 if (Time.time >= m_GameOverSceneTime)

@@ -7,7 +7,18 @@ namespace Unity.LEGO.UI
     public class LoadSceneButton : MonoBehaviour
     {
         public string sceneName = "";
+        public LevelManager levelManager;
 
+        private void Start()
+        {
+            OnStart();
+        }
+        protected virtual void OnStart()
+        {
+            levelManager = FindObjectOfType<LevelManager>();
+            if(levelManager != null)
+                sceneName = levelManager.currentLevel;
+        }
         public void LoadScene()
         {
             SceneManager.LoadScene(sceneName);
